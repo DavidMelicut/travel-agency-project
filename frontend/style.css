@@ -1,0 +1,678 @@
+/* ===================== RESET GENERAL ===================== */
+        * {
+            box-sizing: border-box;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            background: #f5f7fa;
+            color: #222;
+        }
+/* ===================== HEADER + LOGO ===================== */
+        header {
+            background: white;
+            padding: 20px 40px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: #ff0000; /* culoarea logo-ului */
+            text-decoration: none;
+        }
+/* ===================== HERO SECTION ===================== */
+.hero-section {
+    position: relative;
+    background-image: url('https://images.unsplash.com/photo-1436491865332-7a61a109cc05?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80'); /* O imagine generică cu specific de călătorii */
+    background-size: cover;
+    background-position: center;
+    min-height: 500px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+/* Un strat semi-transparent negru pentru a face textul lizibil */
+.hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 1;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    width: 100%;
+    max-width: 1000px;
+}
+
+.hero-content h1 {
+    color: white;
+    font-size: 42px;
+    margin-bottom: 15px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
+
+.hero-content p {
+    color: white;
+    font-size: 18px;
+    margin-bottom: 40px;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+}
+
+/* ===================== SEARCH BAR ===================== */
+        .search-container {
+            margin-top: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        .search-container input,
+        .search-container select {
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+
+        .search-container input:focus,
+        .search-container select:focus {
+            outline: none;
+            border-color: #0077ff;
+        }
+
+        .search-button {
+            grid-column: span 2;
+            padding: 14px;
+            background: #0077ff;
+            color: white;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .search-button:hover {
+            background: #005ed1;
+        }
+/* Bara de căutare din hero, peste imagine (selector mai specific, ca să nu fie suprascris) */
+.hero-content .search-container {
+    background: rgba(255, 255, 255, 0.95);
+    margin-top: 0;
+}
+
+.search-hint {
+    font-size: 14px !important;
+    margin: 12px 0 0 !important;
+    opacity: 0.9;
+}
+
+/* ===================== FOOTER ===================== */
+ /* ===================== CONTACT FOOTER ===================== */
+.footer-contact {
+    margin-bottom: 40px;
+}
+
+.footer-contact h3 {
+    margin-bottom: 15px;
+    font-size: 18px;
+}
+
+.footer-contact p {
+    margin-bottom: 15px;
+    line-height: 1.6;
+}
+
+.footer-contact a {
+    color: #000;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.footer-contact a:hover {
+    text-decoration: underline;
+}
+
+.site-footer {
+            background: #ffffff;
+            padding: 40px 20px 60px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+.footer-top-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+
+        .footer-button {
+            border: 2px solid #5a6ea5;
+            border-radius: 20px;
+            padding: 10px 20px;
+            text-decoration: none;
+            color: #1c2b5a;
+            font-weight: bold;
+            font-size: 13px;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .footer-button span {
+            font-size: 11px;
+            margin-top: 4px;
+        }
+
+        .footer-note {
+            max-width: 900px;
+            margin: 0 auto 25px;
+            font-weight: 500;
+        }
+
+        .footer-copy {
+            margin-bottom: 15px;
+        }
+
+        .footer-company {
+            max-width: 900px;
+            margin: 0 auto 20px;
+            line-height: 1.6;
+        }
+
+        .footer-links a,
+        .footer-documents a {
+            color: #000;
+            font-weight: bold;
+            text-decoration: underline;
+        }
+
+        .footer-documents {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+/* ===================== OFERTE POPULARE ===================== */
+/* ===================== GRID OFERTE POPULARE ===================== */
+.offers-grid {
+    display: grid;
+    /* Magia CSS Grid: Creează coloane de minim 300px. Pe laptop vor intra 3 pe rând, pe tabletă 2, pe telefon 1 */
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px; /* Spațiul dintre carduri */
+    margin-top: 30px;
+}
+
+/* ===================== STILIZARE CARD OFERTĂ ===================== */
+.offer-card {
+    display: flex;
+    flex-direction: column;
+    background: #ffffff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); /* O umbră fină pentru adâncime */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Efect elegant când treci cu mouse-ul peste ofertă */
+.offer-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Setăm o înălțime fixă pentru imagini, ca să arate aliniate */
+.offer-card img {
+    width: 100%;
+    height: 220px;
+    object-fit: cover; /* Taie imaginea proporțional fără să o turtească */
+}
+
+/* Conținutul text din interiorul cardului */
+.offer-details {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1; /* Forțează secțiunea de text să ocupe tot spațiul rămas, egalând înălțimea cardurilor */
+}
+
+.offer-details h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 1.2rem;
+    color: #333;
+}
+
+.offer-details p {
+    margin-top: 0;
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+}
+
+.offer-details .price {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #e67e22; /* O culoare caldă pentru preț */
+    margin-bottom: 15px;
+}
+
+/* Butoanele "Vezi oferta" / "Alege oferta" (sunt link-uri <a>) */
+.book-btn {
+    display: inline-block;
+    text-align: center;
+    text-decoration: none;
+    padding: 10px 15px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.offer-details .book-btn {
+    margin-top: auto; /* Aliniem butonul mereu în partea de jos a cardului */
+}
+
+.book-btn:hover {
+    background-color: #0056b3;
+}
+
+/* ===================== PAGINA REZULTATE ===================== */
+.compact-search {
+    margin-top: 15px;
+    padding: 10px;
+    box-shadow: none;
+    border: 1px solid #eee;
+}
+
+.results-layout {
+    display: flex;
+    gap: 30px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* --- FILTRE LATERAL --- */
+.filters-sidebar {
+    width: 280px;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    height: fit-content;
+}
+
+.filters-sidebar h3 {
+    margin-top: 0;
+    border-bottom: 2px solid #f5f7fa;
+    padding-bottom: 10px;
+}
+
+.filter-group {
+    margin-top: 20px;
+}
+
+.filter-group h4 {
+    margin-bottom: 10px;
+    font-size: 15px;
+}
+
+.filter-group label {
+    display: block;
+    margin-bottom: 8px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+/* --- LISTA REZULTATE --- */
+.results-list {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.result-card {
+    display: flex;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    transition: box-shadow 0.2s;
+}
+
+.result-card:hover {
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.result-card img {
+    width: 250px;
+    object-fit: cover;
+}
+
+.result-info {
+    padding: 20px;
+    flex: 1;
+}
+
+.result-info h2 {
+    margin: 0 0 5px;
+    font-size: 20px;
+    color: #1c2b5a;
+}
+
+.location {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 15px;
+}
+
+.amenities {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.8;
+}
+
+.result-price-action {
+    padding: 20px;
+    background: #fafbfc;
+    border-left: 1px solid #eee;
+    width: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.total-price {
+    font-size: 24px;
+    font-weight: bold;
+    color: #ff0000;
+}
+
+.price-details {
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 15px;
+}
+/* ===================== ELEMENTE COMUNE NOI ===================== */
+.stars {
+    color: #f39c12;
+    font-size: 16px;
+    white-space: nowrap;
+}
+
+.muted {
+    color: #999;
+    font-size: 14px;
+    margin: 0;
+}
+
+.seats-low {
+    color: #d35400;
+    font-weight: bold;
+}
+
+.home-main {
+    min-height: 60vh;
+    padding: 40px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.results-main {
+    padding: 40px;
+    background: #f5f7fa;
+    min-height: 70vh;
+}
+
+.result-card img {
+    min-height: 200px;
+}
+
+.result-price-action .book-btn {
+    width: 100%;
+}
+
+/* --- Toolbar rezultate (număr + sortare) --- */
+.results-column {
+    flex: 1;
+    min-width: 0;
+}
+
+.results-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+    font-size: 14px;
+    color: #555;
+}
+
+.results-toolbar select {
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    margin-left: 6px;
+}
+
+.reset-btn {
+    margin-top: 20px;
+    width: 100%;
+    padding: 10px;
+    background: none;
+    border: 1px solid #0077ff;
+    color: #0077ff;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.reset-btn:hover {
+    background: #eef5ff;
+}
+
+/* ===================== PAGINA OFERTĂ + REZERVARE ===================== */
+.offer-main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 30px 40px 60px;
+}
+
+.back-link {
+    display: inline-block;
+    margin-bottom: 20px;
+    color: #0077ff;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.offer-page {
+    display: flex;
+    gap: 30px;
+    align-items: flex-start;
+}
+
+.offer-overview {
+    flex: 1;
+    min-width: 0;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.offer-overview img {
+    width: 100%;
+    height: 380px;
+    object-fit: cover;
+    display: block;
+}
+
+.offer-overview-body {
+    padding: 25px;
+}
+
+.offer-overview-body h1 {
+    margin: 0 0 5px;
+    color: #1c2b5a;
+    font-size: 28px;
+}
+
+.booking-box {
+    width: 360px;
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    position: sticky;
+    top: 20px;
+}
+
+.booking-box h2 {
+    margin: 0 0 5px;
+}
+
+#booking-form label {
+    display: block;
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 14px;
+    color: #333;
+}
+
+#booking-form input,
+#booking-form select {
+    display: block;
+    width: 100%;
+    margin-top: 6px;
+    padding: 11px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: normal;
+}
+
+#booking-form input:focus,
+#booking-form select:focus {
+    outline: none;
+    border-color: #0077ff;
+}
+
+#booking-form .search-button {
+    width: 100%;
+}
+
+#booking-form .search-button:disabled {
+    background: #8bb8ef;
+    cursor: wait;
+}
+
+.booking-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    border-top: 1px solid #eee;
+    padding: 15px 0;
+    font-size: 16px;
+}
+
+.booking-total strong {
+    font-size: 24px;
+    color: #ff0000;
+}
+
+.form-error {
+    background: #fdecea;
+    color: #b3261e;
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.booking-success h2 {
+    color: #1e8e3e;
+    margin-bottom: 15px;
+}
+
+.booking-success p {
+    line-height: 1.5;
+}
+
+/* ===================== RESPONSIVE ===================== */
+@media (max-width: 900px) {
+    header {
+        padding: 15px 20px;
+    }
+
+    .home-main,
+    .results-main,
+    .offer-main {
+        padding: 20px 16px 40px;
+    }
+
+    .hero-content h1 {
+        font-size: 30px;
+    }
+
+    .results-layout,
+    .offer-page {
+        flex-direction: column;
+    }
+
+    .filters-sidebar,
+    .booking-box {
+        width: 100%;
+        position: static;
+    }
+
+    .result-card {
+        flex-direction: column;
+    }
+
+    .result-card img {
+        width: 100%;
+        height: 200px;
+    }
+
+    .result-price-action {
+        width: 100%;
+        border-left: none;
+        border-top: 1px solid #eee;
+    }
+
+    .offer-overview img {
+        height: 240px;
+    }
+}
+
+@media (max-width: 500px) {
+    .search-button {
+        grid-column: auto;
+    }
+
+    .offers-grid {
+        grid-template-columns: 1fr;
+    }
+}

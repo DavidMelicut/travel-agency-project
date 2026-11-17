@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rezultate Căutare - Travel Agency Project</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css" />
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- ===================== HEADER ===================== -->
+    <header>
+        <a href="index.html" class="logo">Travel Agency Project</a>
+        <form class="search-container compact-search" id="search-form">
+            <input type="text" id="res-dest" placeholder="Destinație" aria-label="Destinație" />
+            <input type="text" id="res-city" placeholder="Oraș plecare" aria-label="Oraș plecare" />
+            <input type="text" id="res-dep-date" placeholder="Data plecării" aria-label="Data plecării" />
+            <input type="text" id="res-ret-date" placeholder="Data întoarcerii" aria-label="Data întoarcerii" />
+            <select id="res-persons" aria-label="Număr persoane">
+                <option value="1">1 persoană</option>
+                <option value="2">2 persoane</option>
+                <option value="3">3 persoane</option>
+                <option value="4">4 persoane</option>
+                <option value="5">5 persoane</option>
+                <option value="6">6 persoane</option>
+            </select>
+            <button type="submit" class="search-button">Modifică căutarea</button>
+        </form>
+    </header>
+
+    <!-- ===================== ZONA DE REZULTATE ===================== -->
+    <main class="results-main">
+        <div class="results-layout">
+
+            <!-- COLOANA STÂNGA: FILTRE -->
+            <aside class="filters-sidebar">
+                <h3>Filtrează rezultatele</h3>
+
+                <div class="filter-group">
+                    <h4>Categorie (Stele)</h4>
+                    <label><input type="checkbox" name="stars" value="5"> 5 Stele</label>
+                    <label><input type="checkbox" name="stars" value="4"> 4 Stele</label>
+                    <label><input type="checkbox" name="stars" value="3"> 3 Stele</label>
+                </div>
+
+                <div class="filter-group">
+                    <h4>Tip Masă</h4>
+                    <div id="board-filters"><p class="muted">—</p></div>
+                </div>
+
+                <div class="filter-group">
+                    <h4>Preț maxim / persoană</h4>
+                    <input type="range" id="price-range" min="0" max="2000" step="10" value="2000">
+                    <p>Până la: <strong id="price-label">2000 €</strong></p>
+                </div>
+
+                <button type="button" class="reset-btn" id="reset-filters">Resetează filtrele</button>
+            </aside>
+
+            <!-- COLOANA DREAPTA: LISTA OFERTE -->
+            <section class="results-column">
+                <div class="results-toolbar">
+                    <span id="results-count"></span>
+                    <label>
+                        Sortează:
+                        <select id="sort-select">
+                            <option value="price-asc">Preț crescător</option>
+                            <option value="price-desc">Preț descrescător</option>
+                            <option value="stars-desc">Stele</option>
+                            <option value="date-asc">Data plecării</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="results-list" id="results-container">
+                    <p>Se încarcă rezultatele...</p>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- ===================== SCRIPTS ===================== -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/l10n/ro.js"></script>
+    <script src="js/common.js"></script>
+
+    <script>
+        const FORM_IDS = {
+            destination: "res-dest",
+            departureCity: "res-city",
+            departureDate: "res-dep-date",
+            returnDate: "res-ret-date",
+            persons: "res-persons",
+        };
+
+        const { depPicker, retPicker } = initDatePickers("#res-dep-date", "#res-ret-date");
+
+        let allOffers = [];      // rezultatele primite de la server
+        let currentPersons = 1;
+
+        // 1. La încărcare: completăm formularul din URL și căutăm
+        const urlParams = new URLSearchParams(window.location.search);
+        document.getElementById("res-dest").value = urlParams.get("destination") || "";
+        document.getElementById("res-city").value = urlParams.get("departure_city") || "";
+        if (urlParams.get("departure_date")) depPicker.setDate(urlParams.get("departure_date"), true);
+        if (urlParams.get("return_date")) retPicker.setDate(urlParams.get("return_date"), true);
+        if (urlParams.get("persons")) document.getElementById("res-persons").value = urlParams.get("persons");
+        fetchResults();
+
+        // 2. "Modifică căutarea": actualizăm URL-ul fără reload și căutăm din nou
+        document.getElementById("search-form").addEventListener("submit", event => {
+            event.preventDefault();
+            const params = new URLSearchParams(readSearchForm(FORM_IDS));
+            window.history.replaceState({}, "", `${window.location.pathname}?${params}`);
+            fetchResults();
+        });
+
+        // 3. Cererea către backend
+        async function fetchResults() {
+            const container = document.getElementById("results-container");
+            container.innerHTML = "<p>Se încarcă rezultatele...</p>";
+
+            const searchData = readSearchForm(FORM_IDS);
+            searchData.persons = parseInt(searchData.persons) || 1;
+            currentPersons = searchData.persons;
+
+            try {
+                const { data } = await apiRequest("/api/search", {
+                    method: "POST",
+                    body: JSON.stringify(searchData),
+                });
+                allOffers = data;
+                buildDynamicFilters();
+                applyFilters();
+            } catch (error) {
+                console.error("Eroare:", error);
+                allOffers = [];
+                document.getElementById("results-count").textContent = "";
+                container.innerHTML =
+                    "<h3>Ne pare rău, a apărut o problemă la conectarea cu serverul. Vă rugăm să încercați mai târziu.</h3>";
+            }
+        }
+
+        // 4. Filtrele care depind de rezultate (tipuri de masă, preț maxim)
+        function buildDynamicFilters() {
+            const boardTypes = [...new Set(allOffers.map(o => o.board_type).filter(Boolean))].sort();
+            document.getElementById("board-filters").innerHTML = boardTypes.length
+                ? boardTypes.map(type => `
+                    <label><input type="checkbox" name="board" value="${escapeHtml(type)}"> ${escapeHtml(type)}</label>
+                  `).join("")
+                : '<p class="muted">—</p>';
+
+            const range = document.getElementById("price-range");
+            const maxPrice = allOffers.length ? Math.ceil(Math.max(...allOffers.map(o => o.price)) / 10) * 10 : 2000;
+            const minPrice = allOffers.length ? Math.floor(Math.min(...allOffers.map(o => o.price)) / 10) * 10 : 0;
+            range.min = minPrice;
+            range.max = maxPrice;
+            range.value = maxPrice;
+            updatePriceLabel();
+        }
+
+        function updatePriceLabel() {
+            document.getElementById("price-label").textContent = formatPrice(document.getElementById("price-range").value);
+        }
+
+        function checkedValues(name) {
+            return [...document.querySelectorAll(`input[name="${name}"]:checked`)].map(input => input.value);
+        }
+
+        // 5. Filtrare + sortare pe client (fără cereri noi la server)
+        function applyFilters() {
+            const selectedStars = checkedValues("stars").map(Number);
+            const selectedBoards = checkedValues("board");
+            const maxPrice = Number(document.getElementById("price-range").value);
+            const sort = document.getElementById("sort-select").value;
+
+            const filtered = allOffers.filter(offer =>
+                (selectedStars.length === 0 || selectedStars.includes(offer.stars)) &&
+                (selectedBoards.length === 0 || selectedBoards.includes(offer.board_type)) &&
+                offer.price <= maxPrice
+            );
+
+            const sorters = {
+                "price-asc": (a, b) => a.price - b.price,
+                "price-desc": (a, b) => b.price - a.price,
+                "stars-desc": (a, b) => b.stars - a.stars || a.price - b.price,
+                "date-asc": (a, b) => a.departure_date.localeCompare(b.departure_date),
+            };
+            filtered.sort(sorters[sort]);
+
+            renderResults(filtered);
+        }
+
+        // 6. Construirea cardurilor
+        function renderResults(offers) {
+            const container = document.getElementById("results-container");
+            document.getElementById("results-count").textContent =
+                `${offers.length} ${offers.length === 1 ? "ofertă găsită" : "oferte găsite"}`;
+
+            if (allOffers.length === 0) {
+                container.innerHTML = "<h3>Nu am găsit oferte pentru aceste criterii. Încearcă alte date!</h3>";
+                return;
+            }
+            if (offers.length === 0) {
+                container.innerHTML = "<h3>Nicio ofertă nu corespunde filtrelor selectate.</h3>";
+                return;
+            }
+
+            container.innerHTML = offers.map(offer => `
+                <article class="result-card">
+                    ${imgTag(offer)}
+                    <div class="result-info">
+                        <h2>${escapeHtml(offer.hotel_name)} <span class="stars">${stars(offer.stars)}</span></h2>
+                        <p class="location">${escapeHtml(offer.location)}</p>
+                        <ul class="amenities">
+                            <li>✈️ Zbor din ${escapeHtml(offer.departure_city)}</li>
+                            <li>📅 ${formatDate(offer.departure_date)} – ${formatDate(offer.return_date)}
+                                (${nightsBetween(offer.departure_date, offer.return_date)} nopți)</li>
+                            <li>🍽️ ${escapeHtml(offer.board_type)}</li>
+                            <li class="${offer.available_seats <= 3 ? "seats-low" : ""}">
+                                💺 ${offer.available_seats} locuri disponibile</li>
+                        </ul>
+                    </div>
+                    <div class="result-price-action">
+                        <span class="total-price">${formatPrice(offer.price * currentPersons)}</span>
+                        <span class="price-details">preț total pentru ${currentPersons}
+                            ${currentPersons === 1 ? "persoană" : "persoane"}<br>(${formatPrice(offer.price)} / pers)</span>
+                        <a class="book-btn" href="${offerUrl(offer.id, currentPersons)}">Alege oferta</a>
+                    </div>
+                </article>
+            `).join("");
+        }
+
+        // 7. Evenimente pentru filtre
+        document.querySelector(".filters-sidebar").addEventListener("change", applyFilters);
+        document.getElementById("price-range").addEventListener("input", () => { updatePriceLabel(); applyFilters(); });
+        document.getElementById("sort-select").addEventListener("change", applyFilters);
+        document.getElementById("reset-filters").addEventListener("click", () => {
+            document.querySelectorAll('.filters-sidebar input[type="checkbox"]').forEach(cb => (cb.checked = false));
+            const range = document.getElementById("price-range");
+            range.value = range.max;
+            updatePriceLabel();
+            applyFilters();
+        });
+    </script>
+</body>
+</html>

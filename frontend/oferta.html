@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Detalii ofertă - Travel Agency Project</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <a href="index.html" class="logo">Travel Agency Project</a>
+    </header>
+
+    <main class="offer-main">
+        <a href="rezultate.html" class="back-link" onclick="if (document.referrer) { history.back(); return false; }">← Înapoi la rezultate</a>
+
+        <div id="offer-container">
+            <p>Se încarcă oferta...</p>
+        </div>
+    </main>
+
+    <script src="js/common.js"></script>
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const offerId = parseInt(params.get("id"));
+        let offer = null;
+
+        async function loadOffer() {
+            const container = document.getElementById("offer-container");
+            if (!offerId) {
+                container.innerHTML = "<h3>Oferta nu a fost găsită.</h3>";
+                return;
+            }
+            try {
+                offer = await apiRequest(`/api/offers/${offerId}`);
+                renderOffer();
+            } catch (error) {
+                container.innerHTML = `<h3>${escapeHtml(error.status === 404 ? "Oferta nu a fost găsită." :
+                    "Nu am putut încărca oferta. Vă rugăm să încercați mai târziu.")}</h3>`;
+            }
+        }
+
+        function renderOffer() {
+            document.title = `${offer.hotel_name} - Travel Agency Project`;
+            const nights = nightsBetween(offer.departure_date, offer.return_date);
+            const maxPersons = Math.min(offer.available_seats, 10);
+            const wanted = Math.min(Math.max(parseInt(params.get("persons")) || 1, 1), Math.max(maxPersons, 1));
+
+            const personOptions = Array.from({ length: maxPersons }, (_, i) => i + 1)
+                .map(n => `<option value="${n}" ${n === wanted ? "selected" : ""}>${n} ${n === 1 ? "persoană" : "persoane"}</option>`)
+                .join("");
+
+            document.getElementById("offer-container").innerHTML = `
+                <div class="offer-page">
+                    <section class="offer-overview">
+                        ${imgTag(offer)}
+                        <div class="offer-overview-body">
+                            <h1>${escapeHtml(offer.hotel_name)} <span class="stars">${stars(offer.stars)}</span></h1>
+                            <p class="location">${escapeHtml(offer.location)}</p>
+                            <p>${escapeHtml(offer.description || "")}</p>
+                            <ul class="amenities">
+                                <li>✈️ Zbor dus-întors din ${escapeHtml(offer.departure_city)}</li>
+                                <li>📅 ${formatDate(offer.departure_date)} – ${formatDate(offer.return_date)} (${nights} nopți)</li>
+                                <li>🍽️ ${escapeHtml(offer.board_type)}</li>
+                                <li id="seats-line" class="${offer.available_seats <= 3 ? "seats-low" : ""}">
+                                    💺 ${offer.available_seats} locuri disponibile</li>
+                            </ul>
+                        </div>
+                    </section>
+
+                    <aside class="booking-box">
+                        <h2>Rezervă acum</h2>
+                        <p class="price-details">${formatPrice(offer.price)} / persoană</p>
+                        ${offer.available_seats === 0 ? `<p class="form-error">Ne pare rău, oferta este sold out.</p>` : `
+                        <form id="booking-form" novalidate>
+                            <label>Nume complet
+                                <input type="text" name="full_name" required minlength="3" maxlength="100" autocomplete="name">
+                            </label>
+                            <label>Email
+                                <input type="email" name="email" required autocomplete="email">
+                            </label>
+                            <label>Telefon
+                                <input type="tel" name="phone" required pattern="\\+?[\\d \\-]{8,20}"
+                                       placeholder="+40 7xx xxx xxx" autocomplete="tel">
+                            </label>
+                            <label>Persoane
+                                <select name="persons">${personOptions}</select>
+                            </label>
+                            <div class="booking-total">
+                                <span>Total</span>
+                                <strong id="booking-total"></strong>
+                            </div>
+                            <p class="form-error" id="form-error" hidden></p>
+                            <button type="submit" class="search-button" id="booking-submit">Trimite rezervarea</button>
+                        </form>`}
+                    </aside>
+                </div>
+            `;
+
+            const form = document.getElementById("booking-form");
+            if (form) {
+                form.persons.addEventListener("change", updateTotal);
+                form.addEventListener("submit", submitBooking);
+                updateTotal();
+            }
+        }
+
+        function updateTotal() {
+            const persons = parseInt(document.getElementById("booking-form").persons.value);
+            document.getElementById("booking-total").textContent = formatPrice(offer.price * persons);
+        }
+
+        async function submitBooking(event) {
+            event.preventDefault();
+            const form = event.target;
+            const errorBox = document.getElementById("form-error");
+            errorBox.hidden = true;
+
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const button = document.getElementById("booking-submit");
+            button.disabled = true;
+            button.textContent = "Se trimite...";
+
+            try {
+                const booking = await apiRequest("/api/bookings", {
+                    method: "POST",
+                    body: JSON.stringify({
+                        offer_id: offer.id,
+                        full_name: form.full_name.value,
+                        email: form.email.value,
+                        phone: form.phone.value,
+                        persons: parseInt(form.persons.value),
+                    }),
+                });
+                document.querySelector(".booking-box").innerHTML = `
+                    <div class="booking-success">
+                        <h2>✅ Rezervare înregistrată!</h2>
+                        <p>Numărul rezervării: <strong>#${booking.id}</strong></p>
+                        <p>${escapeHtml(booking.full_name)}, ${booking.persons}
+                           ${booking.persons === 1 ? "persoană" : "persoane"} — total <strong>${formatPrice(booking.total_price)}</strong>.</p>
+                        <p>Te vom contacta la <strong>${escapeHtml(booking.email)}</strong> pentru confirmare și plată.</p>
+                        <a href="index.html" class="book-btn">Înapoi la pagina principală</a>
+                    </div>`;
+                const seatsLeft = offer.available_seats - booking.persons;
+                document.getElementById("seats-line").textContent = `💺 ${seatsLeft} locuri disponibile`;
+            } catch (error) {
+                errorBox.textContent = error.message;
+                errorBox.hidden = false;
+                button.disabled = false;
+                button.textContent = "Trimite rezervarea";
+                if (error.status === 409) {
+                    // Între timp s-au ocupat locuri -> reîncărcăm oferta cu numărul actualizat
+                    setTimeout(loadOffer, 2500);
+                }
+            }
+        }
+
+        loadOffer();
+    </script>
+</body>
+</html>
